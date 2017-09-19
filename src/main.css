@@ -1,12 +1,87 @@
 body {
   font-family: 'Source Sans Pro', 'Trebuchet MS', 'Lucida Grande', 'Bitstream Vera Sans', 'Helvetica Neue', sans-serif;
-  font-size: 30px;
+  font-size: 20px;
   margin: 0;
   text-align: center;
   color: #293c4b;
 }
 
-img {
-  margin: 20px 0;
-  max-width: 200px;
+#mainbox {
+  width: 350px;
+  height: 250;
+  margin: 10px auto;
+  border: 1px solid #c2c2c2;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 0 4px #20B2AA;
+}
+
+.wrapper {
+  margin: 20px;
+}
+
+.description {
+  margin: 10px;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.words {
+  font-size: 14px;
+  font-weight: bold;
+  margin: 10px auto;
+  color: #20B2AA;
+}
+
+#sentence-word {
+  color: #20B2AA;
+}
+
+circle {
+  fill: #20B2AA;
+}
+
+path {
+  fill: #FF69B4;
+}
+
+button {
+  height: 32px;
+  width: 62px;
+  font-size: 15px;
+  border-radius: 5px;
+  border: 0;
+  cursor: pointer;
+  background: #20B2AA;
+  color: #fff;
+}
+
+input {
+  border: 1px solid #c2c2c2;
+  border-radius: 5px;
+  height: 25px;
+  width: 70%;
+  margin: auto 10%;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+}
+
+input:focus {
+  box-shadow: 0 1px 1px rgba(20, 178, 170, 0.075) inset, 0 0 8px rgba(20, 178, 170, 0.6);
+  outline: 0 none;
+}
+
+input.wrong {
+  box-shadow: 0 0px 1px rgba(255, 0, 0, 1) inset, 0 0 8px rgba(255, 0, 0, 0.6);
+  background: rgb(250, 218, 221);
+  color: #fff;
+  outline: 0 none;
+}
+
+svg {
+  float: right;
+  width: 40px;
+  height: 40px;
+  filter: drop-shadow( 0 0 4px #FF1493 );
 }

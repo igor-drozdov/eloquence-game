@@ -151,6 +151,7 @@ updateIdleState msg model =
                                     , "exceptional"
                                     , "fabulous"
                                     , "glorious"
+                                    , "immaculate"
                                     , "impressive"
                                     , "incredible"
                                     , "majestic"

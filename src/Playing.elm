@@ -4,17 +4,14 @@ import Model exposing (..)
 import Set
 import Time exposing (Time, second)
 import Array
-import Task
 import Random
 import Svg exposing (svg, circle, path)
 import Svg.Attributes exposing (cx, cy, r, fill, d)
-import Json.Decode as Json
-import PlayingState exposing (State, Sentence)
-import Html exposing (Html, text, div, img, button, input, span, p)
-import Html.Attributes exposing (src, placeholder, value, id, class)
-import Html.Events exposing (onInput, onClick, on, keyCode)
-import Process
+import PlayingState exposing (State)
+import Html exposing (Html, div)
+import Html.Attributes exposing (id, class)
 import GameOverState
+import Sentence
 
 
 period : Float
@@ -22,81 +19,33 @@ period =
     20
 
 
-fieldId : String
-fieldId =
-    "field"
-
-
 type Msg
-    = UpdateWord String
-    | AddWord
-    | ClearField
+    = SentenceMsg Sentence.Msg
     | EndRound (List String) Int
     | Tick Time
 
 
 init : Model
 init =
-    let
-        sentence =
-            Sentence "The application is"
-                "great"
-                "Be more expressive"
-                (Set.fromList
-                    [ "awesome"
-                    , "amazing"
-                    , "breathtaking"
-                    , "exceptional"
-                    , "fabulous"
-                    , "glorious"
-                    , "immaculate"
-                    , "impressive"
-                    , "incredible"
-                    , "majestic"
-                    , "magnificent"
-                    , "marvelous"
-                    , "superb"
-                    , "supercalifragilisticexpialidocious"
-                    , "unbelievable"
-                    , "unthinkable"
-                    ]
-                )
-    in
-        Playing (State [] sentence 0 "" False)
+    Playing (State Sentence.init 0)
 
 
 update : Msg -> State -> ( Model, Cmd Msg )
 update msg state =
     case msg of
-        UpdateWord value ->
-            Playing { state | word = value }
-                ! []
-
-        AddWord ->
-            if Set.member state.word state.sentence.synonyms then
-                let
-                    oldSentence =
-                        state.sentence
-
-                    newSentence =
-                        { oldSentence | synonyms = Set.remove state.word oldSentence.synonyms }
-                in
-                    Playing { state | words = state.word :: state.words, sentence = newSentence, word = "" }
-                        ! []
-            else
-                ( Playing { state | wrongWord = True }
-                , Process.sleep 200 |> Task.perform (\_ -> ClearField)
-                )
-
-        ClearField ->
-            Playing { state | word = "", wrongWord = False } ! []
+        SentenceMsg m ->
+            let
+                ( subMdl, subMsg ) =
+                    Sentence.update m state.sentence
+            in
+                ( Playing { state | sentence = subMdl }, Cmd.map SentenceMsg subMsg )
 
         EndRound words randomNumber ->
             let
                 word =
                     Array.get randomNumber (Array.fromList words)
             in
-                GameOver (GameOverState.State word (List.length state.words)) ! []
+                GameOver (GameOverState.State word (List.length state.sentence.words)) ! []
 
         Tick _ ->
             if state.elapsed == period then
@@ -116,9 +65,7 @@ view : State -> Html Msg
 view state =
     div [ id "mainbox" ]
         [ renderTime state.elapsed
-        , renderSentence state.sentence
-        , div [ class "words" ] [ text (String.join ", " state.words) ]
-        , renderWordInput state
+        , Html.map SentenceMsg <| Sentence.view state.sentence
         ]
 
 
@@ -183,46 +130,6 @@ renderTime elapsed =
             [ circle [ cx midAttrStr, cy midAttrStr, r radiusStr ] []
             , path [ d dAttr ] []
             ]
-
-
-renderWordInput : State -> Html Msg
-renderWordInput state =
-    let
-        onEnter msg =
-            let
-                isEnter code =
-                    if code == 13 then
-                        Json.succeed msg
-                    else
-                        Json.fail "not ENTER"
-            in
-                on "keydown" (Json.andThen isEnter keyCode)
-    in
-        input
-            [ placeholder "Enter your word"
-            , onInput UpdateWord
-            , onEnter AddWord
-            , value state.word
-            , id fieldId
-            , class
-                (if state.wrongWord then
-                    "wrong"
-                 else
-                    ""
-                )
-            ]
-            []
-
-
-renderSentence : Sentence -> Html Msg
-renderSentence sentence =
-    div [ class "wrapper" ]
-        [ div [ class "description" ] [ text sentence.description ]
-        , div []
-            [ text (sentence.prefix ++ " ")
-            , span [ id "sentence-word" ] [ text sentence.word ]
-            ]
-        ]
 
 
 subscriptions : State -> Sub Msg

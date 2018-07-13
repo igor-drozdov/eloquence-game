@@ -1,20 +1,9 @@
 module PlayingState exposing (..)
 
-import Set exposing (Set)
-
-
-type alias Sentence =
-    { prefix : String
-    , word : String
-    , description : String
-    , synonyms : Set String
-    }
+import Sentence
 
 
 type alias State =
-    { words : List String
-    , sentence : Sentence
+    { sentence : Sentence.Model
     , elapsed : Float
-    , word : String
-    , wrongWord : Bool
     }

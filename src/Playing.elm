@@ -7,11 +7,11 @@ import Array
 import Random
 import Svg exposing (svg, circle, path)
 import Svg.Attributes exposing (cx, cy, r, fill, d)
-import PlayingState exposing (State)
+import Playing.State exposing (State)
 import Html exposing (Html, div)
 import Html.Attributes exposing (id, class)
-import GameOverState
-import Sentence
+import GameOver.State as GameOverState
+import Playing.Sentence as Sentence
 
 
 period : Float
@@ -23,11 +23,6 @@ type Msg
     = SentenceMsg Sentence.Msg
     | EndRound (List String) Int
     | Tick Time
-
-
-init : Model
-init =
-    Playing (State Sentence.init 0)
 
 
 update : Msg -> State -> ( Model, Cmd Msg )

@@ -1,4 +1,4 @@
-module Sentence exposing (..)
+module Playing.Sentence exposing (..)
 
 import Set exposing (Set)
 import Process

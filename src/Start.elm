@@ -3,7 +3,7 @@ module Start exposing (..)
 import Model exposing (Model)
 import Dom
 import Task
-import Playing
+import Playing.State
 import Html exposing (Html, div, button, text)
 import Html.Attributes exposing (id, class)
 import Html.Events exposing (onClick)
@@ -27,7 +27,7 @@ update msg =
                 focus =
                     Dom.focus fieldId |> Task.attempt (\_ -> NoOp)
             in
-                ( Playing.init, focus )
+                ( Model.Playing Playing.State.init, focus )
 
         NoOp ->
             Model.Start ! []

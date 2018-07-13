@@ -1,7 +1,7 @@
 module GameOver exposing (..)
 
-import Playing
-import GameOverState exposing (State)
+import Playing.State
+import GameOver.State exposing (State)
 import Model exposing (Model)
 import Dom
 import Task
@@ -28,7 +28,7 @@ update msg state =
                 focus =
                     Dom.focus fieldId |> Task.attempt (\_ -> NoOp)
             in
-                ( Playing.init, focus )
+                ( Model.Playing Playing.State.init, focus )
 
         NoOp ->
             Model.Start ! []

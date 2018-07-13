@@ -1,7 +1,7 @@
 module Model exposing (..)
 
-import GameOverState
-import PlayingState
+import GameOver.State as GameOverState
+import Playing.State as PlayingState
 
 
 type Model

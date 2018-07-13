@@ -1,4 +1,4 @@
-module GameOverState exposing (..)
+module GameOver.State exposing (..)
 
 
 type alias State =

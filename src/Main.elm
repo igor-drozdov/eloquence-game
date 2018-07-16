@@ -20,42 +20,30 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case model of
-        Playing state ->
-            case msg of
-                PlayingMsg m ->
-                    let
-                        ( newModel, subMsg ) =
-                            Playing.update m state
-                    in
-                        ( newModel, Cmd.map PlayingMsg subMsg )
+    case ( msg, model ) of
+        ( PlayingMsg m, Playing state ) ->
+            let
+                ( newModel, subMsg ) =
+                    Playing.update m state
+            in
+                ( newModel, Cmd.map PlayingMsg subMsg )
 
-                _ ->
-                    model ! []
+        ( StartMsg m, Start ) ->
+            let
+                ( newModel, subMsg ) =
+                    Start.update m
+            in
+                ( newModel, Cmd.map StartMsg subMsg )
 
-        Start ->
-            case msg of
-                StartMsg m ->
-                    let
-                        ( newModel, subMsg ) =
-                            Start.update m
-                    in
-                        ( newModel, Cmd.map StartMsg subMsg )
+        ( GameOverMsg m, GameOver state ) ->
+            let
+                ( newModel, subMsg ) =
+                    GameOver.update m state
+            in
+                ( newModel, Cmd.map GameOverMsg subMsg )
 
-                _ ->
-                    model ! []
-
-        GameOver state ->
-            case msg of
-                GameOverMsg m ->
-                    let
-                        ( newModel, subMsg ) =
-                            GameOver.update m state
-                    in
-                        ( newModel, Cmd.map GameOverMsg subMsg )
-
-                _ ->
-                    model ! []
+        _ ->
+            model ! []
 
 
 subscriptions : Model -> Sub Msg

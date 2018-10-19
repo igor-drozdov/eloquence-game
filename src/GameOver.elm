@@ -1,9 +1,5 @@
 module GameOver exposing (..)
 
-import Playing.State
-import GameOver.State exposing (State)
-import Model exposing (Model)
-import Dom
 import Task
 import Html exposing (Html, div, button, text, span)
 import Html.Attributes exposing (id, class)
@@ -15,30 +11,37 @@ fieldId =
     "field"
 
 
+init : Int -> Maybe String -> Model
+init =
+    Model
+
+
+type alias Model =
+    { score : Int
+    , hint : Maybe String
+    }
+
+
 type Msg
-    = RestartGame
-    | NoOp
+    = Transition
+    | Restart
 
 
-update : Msg -> State -> ( Model, Cmd Msg )
-update msg state =
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
     case msg of
-        RestartGame ->
-            let
-                focus =
-                    Dom.focus fieldId |> Task.attempt (\_ -> NoOp)
-            in
-                ( Model.Playing Playing.State.init, focus )
+        Restart ->
+            ( model, Task.succeed Transition |> Task.perform identity )
 
-        NoOp ->
-            Model.Start ! []
+        _ ->
+            model ! []
 
 
-view : State -> Html Msg
-view state =
+view : Model -> Html Msg
+view model =
     let
         hint =
-            case state.hint of
+            case model.hint of
                 Just word ->
                     div [ class "description" ]
                         [ span [] [ text "Hint: " ]
@@ -50,8 +53,8 @@ view state =
     in
         div [ id "mainbox" ]
             [ div [ class "wrapper" ]
-                [ div [] [ text ("Your score is: " ++ (toString state.score)) ]
+                [ div [] [ text ("Your score is: " ++ (toString model.score)) ]
                 , hint
                 ]
-            , button [ onClick RestartGame ] [ text "Restart" ]
+            , button [ onClick Restart ] [ text "Restart" ]
             ]

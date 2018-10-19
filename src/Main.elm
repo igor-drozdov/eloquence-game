@@ -1,46 +1,61 @@
 module Main exposing (..)
 
-import Model exposing (..)
-import Playing
-import Start
-import GameOver
+import Playing as PlayingWidget
+import Start as StartWidget
+import GameOver as GameOverWidget
 import Html exposing (Html)
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model.init, Cmd.none )
+    ( Start, Cmd.none )
+
+
+type Model
+    = Start
+    | Playing PlayingWidget.Model
+    | GameOver GameOverWidget.Model
 
 
 type Msg
-    = StartMsg Start.Msg
-    | PlayingMsg Playing.Msg
-    | GameOverMsg GameOver.Msg
+    = StartMsg StartWidget.Msg
+    | PlayingMsg PlayingWidget.Msg
+    | GameOverMsg GameOverWidget.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model ) of
+        ( StartMsg StartWidget.Transition, _ ) ->
+            let
+                ( newModel, subMsg ) =
+                    PlayingWidget.init
+            in
+                ( Playing newModel, Cmd.map PlayingMsg subMsg )
+
+        ( PlayingMsg (PlayingWidget.Transition score hint), _ ) ->
+            ( GameOver <| GameOverWidget.init score hint, Cmd.none )
+
         ( PlayingMsg m, Playing state ) ->
             let
                 ( newModel, subMsg ) =
-                    Playing.update m state
+                    PlayingWidget.update m state
             in
-                ( newModel, Cmd.map PlayingMsg subMsg )
+                ( Playing newModel, Cmd.map PlayingMsg subMsg )
 
-        ( StartMsg m, Start ) ->
+        ( GameOverMsg GameOverWidget.Transition, _ ) ->
             let
                 ( newModel, subMsg ) =
-                    Start.update m
+                    PlayingWidget.init
             in
-                ( newModel, Cmd.map StartMsg subMsg )
+                ( Playing newModel, Cmd.map PlayingMsg subMsg )
 
         ( GameOverMsg m, GameOver state ) ->
             let
                 ( newModel, subMsg ) =
-                    GameOver.update m state
+                    GameOverWidget.update m state
             in
-                ( newModel, Cmd.map GameOverMsg subMsg )
+                ( GameOver newModel, Cmd.map GameOverMsg subMsg )
 
         _ ->
             model ! []
@@ -50,7 +65,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     case model of
         Playing state ->
-            Sub.map PlayingMsg <| Playing.subscriptions state
+            Sub.map PlayingMsg <| PlayingWidget.subscriptions state
 
         _ ->
             Sub.none
@@ -60,13 +75,13 @@ view : Model -> Html Msg
 view model =
     case model of
         Start ->
-            Html.map StartMsg <| Start.view
+            Html.map StartMsg <| StartWidget.view
 
         Playing state ->
-            Html.map PlayingMsg <| Playing.view state
+            Html.map PlayingMsg <| PlayingWidget.view state
 
         GameOver state ->
-            Html.map GameOverMsg <| GameOver.view state
+            Html.map GameOverMsg <| GameOverWidget.view state
 
 
 main : Program Never Model Msg

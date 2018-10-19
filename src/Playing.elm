@@ -1,17 +1,20 @@
 module Playing exposing (..)
 
-import Model exposing (..)
+import Dom
 import Set
+import Task
 import Time exposing (Time, second)
-import Array
 import Random
 import Svg exposing (svg, circle, path)
 import Svg.Attributes exposing (cx, cy, r, fill, d)
-import Playing.State exposing (State)
 import Html exposing (Html, div)
 import Html.Attributes exposing (id, class)
-import GameOver.State as GameOverState
 import Playing.Sentence as Sentence
+
+
+fieldId : String
+fieldId =
+    "field"
 
 
 period : Float
@@ -19,48 +22,71 @@ period =
     20
 
 
+type alias Model =
+    { sentence : Sentence.Model
+    , elapsed : Float
+    }
+
+
+init : ( Model, Cmd Msg )
+init =
+    let
+        focus =
+            Dom.focus fieldId |> Task.attempt (\_ -> NoOp)
+    in
+        ( Model Sentence.init 0, focus )
+
+
 type Msg
     = SentenceMsg Sentence.Msg
-    | EndRound (List String) Int
     | Tick Time
+    | EndGame (List String) Int
+    | Transition Int (Maybe String)
+    | NoOp
 
 
-update : Msg -> State -> ( Model, Cmd Msg )
-update msg state =
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
     case msg of
         SentenceMsg m ->
             let
                 ( subMdl, subMsg ) =
-                    Sentence.update m state.sentence
+                    Sentence.update m model.sentence
             in
-                ( Playing { state | sentence = subMdl }, Cmd.map SentenceMsg subMsg )
+                ( { model | sentence = subMdl }, Cmd.map SentenceMsg subMsg )
 
-        EndRound words randomNumber ->
+        EndGame words index ->
             let
                 word =
-                    Array.get randomNumber (Array.fromList words)
+                    List.head <| List.drop index <| words
+
+                command =
+                    Transition (List.length model.sentence.words) word
             in
-                GameOver (GameOverState.State word (List.length state.sentence.words)) ! []
+                ( model, Task.succeed command |> Task.perform identity )
 
         Tick _ ->
-            if state.elapsed == period then
+            if model.elapsed == period then
                 let
                     words =
-                        Set.toList state.sentence.synonyms
+                        Set.toList model.sentence.synonyms
 
                     command =
-                        Random.generate (EndRound words) (Random.int 0 (List.length words - 1))
+                        Random.generate (EndGame words) (Random.int 0 (List.length words - 1))
                 in
-                    ( Playing state, command )
+                    ( model, command )
             else
-                Playing { state | elapsed = state.elapsed + 1 } ! []
+                { model | elapsed = model.elapsed + 1 } ! []
+
+        _ ->
+            model ! []
 
 
-view : State -> Html Msg
-view state =
+view : Model -> Html Msg
+view model =
     div [ id "mainbox" ]
-        [ renderTime state.elapsed
-        , Html.map SentenceMsg <| Sentence.view state.sentence
+        [ renderTime model.elapsed
+        , Html.map SentenceMsg <| Sentence.view model.sentence
         ]
 
 
@@ -127,6 +153,6 @@ renderTime elapsed =
             ]
 
 
-subscriptions : State -> Sub Msg
-subscriptions state =
+subscriptions : Model -> Sub Msg
+subscriptions model =
     Time.every second Tick

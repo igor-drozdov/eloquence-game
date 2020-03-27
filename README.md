@@ -3,7 +3,6 @@ This is a tiny game as an experiment with Elm language. There is a [blog post](h
 1. What about adding some more text?
 2. What about adding some more text?
 3. What about adding some more text?
-4. What about adding some more text?
 5. What about adding some more text?
 6. What about adding some more text?
 7. What about adding some more text?
